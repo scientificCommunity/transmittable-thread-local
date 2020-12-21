@@ -33,6 +33,12 @@ import static com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.
 public class TtlExecutorTransformlet implements JavassistTransformlet {
     private static final Logger logger = Logger.getLogger(TtlExecutorTransformlet.class);
 
+    /**
+     * 修饰匿名executor
+     * key:创建匿名executor的类
+     * value:创建匿名executor的行号
+     */
+    private static final Map<String, Integer> ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE = new HashMap<String, Integer>();
     private static final Set<String> EXECUTOR_CLASS_NAMES = new HashSet<String>();
     private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
 
@@ -40,9 +46,13 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
     private static final String RUNNABLE_CLASS_NAME = "java.lang.Runnable";
 
     static {
+        ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.put("io.vertx.grpc.VertxChannelBuilder", 293);
+
         EXECUTOR_CLASS_NAMES.add(THREAD_POOL_EXECUTOR_CLASS_NAME);
         EXECUTOR_CLASS_NAMES.add("java.util.concurrent.ScheduledThreadPoolExecutor");
         EXECUTOR_CLASS_NAMES.add("io.netty.util.concurrent.SingleThreadEventExecutor");
+        EXECUTOR_CLASS_NAMES.add("io.netty.util.concurren.ThreadPerTaskExecutor");
+        EXECUTOR_CLASS_NAMES.add("io.vertx.grpc.VertxChannelBuilder$1");
 
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(RUNNABLE_CLASS_NAME, "com.alibaba.ttl.TtlRunnable");
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put("java.util.concurrent.Callable", "com.alibaba.ttl.TtlCallable");
@@ -67,6 +77,9 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
             if (disableInheritableForThreadPool) updateConstructorDisableInheritable(clazz);
 
             classInfo.setModified();
+        } else if (ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.containsKey(classInfo.getClassName())) {
+            CtMethod method = clazz.getDeclaredMethod("build");
+            //decorateAnonymousExecutor(method, ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.get(classInfo.getClassName()));
         } else {
             if (clazz.isPrimitive() || clazz.isArray() || clazz.isInterface() || clazz.isAnnotation()) {
                 return;
@@ -96,16 +109,31 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
             final String paramTypeName = parameterTypes[i].getName();
             if (PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.containsKey(paramTypeName)) {
                 String code = String.format(
-                        // decorate to TTL wrapper,
-                        // and then set AutoWrapper attachment/Tag
-                        "$%d = %s.get($%1$d, false, true);"
-                                + "\ncom.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.setAutoWrapperAttachment($%1$d);",
-                        i + 1, PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.get(paramTypeName));
+                    // decorate to TTL wrapper,
+                    // and then set AutoWrapper attachment/Tag
+                    "$%d = %s.get($%1$d, false, true);"
+                        + "\ncom.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.setAutoWrapperAttachment($%1$d);",
+                    i + 1, PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.get(paramTypeName));
                 logger.info("insert code before method " + signatureOfMethod(method) + " of class " + method.getDeclaringClass().getName() + ": " + code);
                 insertCode.append(code);
             }
         }
         if (insertCode.length() > 0) method.insertBefore(insertCode.toString());
+    }
+
+    /**
+     * 修饰Executor的匿名实现的execute&submit方法
+     */
+    @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
+    private void decorateAnonymousExecutor(CtMethod method, Integer lineNum) throws NotFoundException, CannotCompileException {
+        String code = String.format(
+            // decorate to TTL wrapper,
+            // and then set AutoWrapper attachment/Tag
+            "$%d = %s.get($%1$d, false, true);"
+                + "\ncom.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.setAutoWrapperAttachment($%1$d);",
+            1, "com.alibaba.ttl.TtlRunnable");
+        logger.info("insert code before method " + signatureOfMethod(method) + " of class " + method.getDeclaringClass().getName() + ": " + code);
+        method.insertAt(lineNum, true, code);
     }
 
     /**
