@@ -90,7 +90,9 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
                 updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(method);
             }
 
-            if (disableInheritableForThreadPool) updateConstructorDisableInheritable(clazz);
+            if (disableInheritableForThreadPool) {
+                updateConstructorDisableInheritable(clazz);
+            }
 
             classInfo.setModified();
         } else if (ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.containsKey(classInfo.getClassName())) {
