@@ -99,6 +99,12 @@
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-core</artifactId>
 			<version>4.0.0</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-rx-java2</artifactId>
+			<version>4.0.0</version>
 <!--			<optional>true</optional>-->
 		</dependency>
 		<!--
