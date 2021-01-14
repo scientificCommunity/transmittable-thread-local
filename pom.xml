@@ -5,7 +5,7 @@
 
 	<groupId>com.moumou</groupId>
 	<artifactId>transmittable-thread-local</artifactId>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 	<name>TransmittableThreadLocal(TTL)</name>
 	<description>
