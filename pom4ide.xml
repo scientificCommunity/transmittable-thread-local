@@ -10,7 +10,8 @@
 	<name>TransmittableThreadLocal(TTL)</name>
 	<description>
 		📌 The missing Java™ std lib(simple &amp; 0-dependency) for framework/middleware,
-		provide an enhanced InheritableThreadLocal that transmits ThreadLocal value between threads even using thread pooling components.
+		provide an enhanced InheritableThreadLocal that transmits ThreadLocal value between threads even using thread
+		pooling components.
 	</description>
 	<url>https://github.com/alibaba/transmittable-thread-local</url>
 	<inceptionYear>2013</inceptionYear>
@@ -98,8 +99,14 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-core</artifactId>
-			<version>4.0.0</version>
-			<!--			<optional>true</optional>-->
+			<version>4.0.0-milestone4</version>
+			<!--<optional>true</optional>-->
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-rx-java2</artifactId>
+			<version>4.0.0-milestone4</version>
+			<!--<optional>true</optional>-->
 		</dependency>
 		<!--
 			javassist v3.23 is the last version support Java 6
@@ -177,6 +184,15 @@
 			<version>3.5</version>
 			<scope>test</scope>
 		</dependency>
+<<<<<<< HEAD
+=======
+		<dependency>
+			<groupId>io.reactivex.rxjava2</groupId>
+			<artifactId>rxjava</artifactId>
+			<version>2.2.19</version>
+			<scope>compile</scope>
+		</dependency>
+>>>>>>> vert.x-support
 	</dependencies>
 
 	<distributionManagement>
@@ -456,7 +472,12 @@
 							<excludePackageNames>*.internal.*</excludePackageNames>
 							<sourceFileExcludes>
 								<!-- exclude deprecated TtlEnhanced from javadoc -->
+<<<<<<< HEAD
 								<sourceFilesourceFileExclude>com/alibaba/ttl/TtlEnhanced.java</sourceFilesourceFileExclude>
+=======
+								<sourceFilesourceFileExclude>com/alibaba/ttl/TtlEnhanced.java
+								</sourceFilesourceFileExclude>
+>>>>>>> vert.x-support
 							</sourceFileExcludes>
 							<overview>src/api/overview.html</overview>
 							<isOffline>true</isOffline>
@@ -483,7 +504,12 @@
 									<location>${project.basedir}/src/package-list/java/</location>
 								</offlineLink>
 								<offlineLink>
+<<<<<<< HEAD
 									<url>https://static.javadoc.io/com.github.spotbugs/spotbugs-annotations/3.1.12/</url>
+=======
+									<url>https://static.javadoc.io/com.github.spotbugs/spotbugs-annotations/3.1.12/
+									</url>
+>>>>>>> vert.x-support
 									<location>${project.basedir}/src/package-list/spotbugs-annotations/</location>
 								</offlineLink>
 							</offlineLinks>
@@ -602,7 +628,13 @@
 								</validationProperty>
 							</validationProperties>
 							<generateGitPropertiesFile>true</generateGitPropertiesFile>
+<<<<<<< HEAD
 							<generateGitPropertiesFilename>${project.build.outputDirectory}/META-INF/scm/${project.groupId}/${project.artifactId}/git.properties</generateGitPropertiesFilename>
+=======
+							<generateGitPropertiesFilename>
+								${project.build.outputDirectory}/META-INF/scm/${project.groupId}/${project.artifactId}/git.properties
+							</generateGitPropertiesFilename>
+>>>>>>> vert.x-support
 						</configuration>
 					</plugin>
 				</plugins>
