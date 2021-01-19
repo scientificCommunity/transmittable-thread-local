@@ -115,6 +115,9 @@ import java.util.logging.Level;
  * @since 0.9.0
  */
 public final class TtlAgent {
+
+    private static final String TRUE_STRING = "true";
+
     /**
      * Entrance method of TTL Java Agent.
      *
@@ -136,6 +139,12 @@ public final class TtlAgent {
             final List<JavassistTransformlet> transformletList = new ArrayList<JavassistTransformlet>();
             transformletList.add(new TtlExecutorTransformlet(disableInheritableForThreadPool));
             transformletList.add(new TtlForkJoinTransformlet(disableInheritableForThreadPool));
+
+            String property = System.getProperty("vertx.support.enable");
+            //默认不启用
+            if (property != null && property.equals(TRUE_STRING)) {
+                transformletList.add(new TtlFutureTransformlet());
+            }
             transformletList.add(new TtlFutureTransformlet());
             if (isEnableTimerTask()) transformletList.add(new TtlTimerTaskTransformlet());
 
