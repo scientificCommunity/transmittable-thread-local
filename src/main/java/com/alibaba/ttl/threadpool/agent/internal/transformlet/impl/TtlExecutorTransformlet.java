@@ -45,15 +45,6 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
     private static final String THREAD_POOL_EXECUTOR_CLASS_NAME = "java.util.concurrent.ThreadPoolExecutor";
     private static final String RUNNABLE_CLASS_NAME = "java.lang.Runnable";
 
-
-//    private static final String FUNCTION_INVOKE_CLASS_NAME = "io.vertx.core.Future";
-    private static final String FUNCTION_CLASS_NAME = "java.util.function.Function";
-    private static final String TTL_FUNCTION_CLASS_NAME = "com.alibaba.ttl.TtlFunction";
-
-    private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.impl.FutureImpl";
-    private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
-    private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
-
     static {
         ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.put("io.vertx.grpc.VertxChannelBuilder", 293);
 
@@ -62,13 +53,9 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
         EXECUTOR_CLASS_NAMES.add("io.netty.util.concurrent.SingleThreadEventExecutor");
         EXECUTOR_CLASS_NAMES.add("io.netty.util.concurrent.ThreadPerTaskExecutor");
         EXECUTOR_CLASS_NAMES.add("io.netty.util.concurrent.FastThreadLocalRunnable");
-//        EXECUTOR_CLASS_NAMES.add(FUNCTION_INVOKE_CLASS_NAME);
-//        EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
 
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(RUNNABLE_CLASS_NAME, "com.alibaba.ttl.TtlRunnable");
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put("java.util.concurrent.Callable", "com.alibaba.ttl.TtlCallable");
-//        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(FUNCTION_CLASS_NAME, TTL_FUNCTION_CLASS_NAME);
-//        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
     }
 
     private static final String THREAD_FACTORY_CLASS_NAME = "java.util.concurrent.ThreadFactory";
@@ -90,9 +77,6 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
             if (disableInheritableForThreadPool) updateConstructorDisableInheritable(clazz);
 
             classInfo.setModified();
-        } else if (ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.containsKey(classInfo.getClassName())) {
-            CtMethod method = clazz.getDeclaredMethod("build");
-            //decorateAnonymousExecutor(method, ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.get(classInfo.getClassName()));
         } else {
             if (clazz.isPrimitive() || clazz.isArray() || clazz.isInterface() || clazz.isAnnotation()) {
                 return;
@@ -121,16 +105,6 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
         for (int i = 0; i < parameterTypes.length; i++) {
             final String paramTypeName = parameterTypes[i].getName();
             if (PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.containsKey(paramTypeName)) {
-                /*if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
-                    if (!"request".equals(method.getName())) {
-                        return;
-                    }
-                }*/
-                /*if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
-                    if (!"setHandler".equals(method.getName())) {
-                        return;
-                    }
-                }*/
                 String code = String.format(
                     // decorate to TTL wrapper,
                     // and then set AutoWrapper attachment/Tag
