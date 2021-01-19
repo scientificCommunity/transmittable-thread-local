@@ -33,12 +33,6 @@ import static com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.
 public class TtlExecutorTransformlet implements JavassistTransformlet {
     private static final Logger logger = Logger.getLogger(TtlExecutorTransformlet.class);
 
-    /**
-     * 修饰匿名executor
-     * key:创建匿名executor的类
-     * value:创建匿名executor的行号
-     */
-    private static final Map<String, Integer> ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE = new HashMap<String, Integer>();
     private static final Set<String> EXECUTOR_CLASS_NAMES = new HashSet<String>();
     private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
 
@@ -46,8 +40,6 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
     private static final String RUNNABLE_CLASS_NAME = "java.lang.Runnable";
 
     static {
-        ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE.put("io.vertx.grpc.VertxChannelBuilder", 293);
-
         EXECUTOR_CLASS_NAMES.add(THREAD_POOL_EXECUTOR_CLASS_NAME);
         EXECUTOR_CLASS_NAMES.add("java.util.concurrent.ScheduledThreadPoolExecutor");
         EXECUTOR_CLASS_NAMES.add("io.netty.util.concurrent.SingleThreadEventExecutor");
