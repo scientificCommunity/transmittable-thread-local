@@ -96,6 +96,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-core</artifactId>
+			<version>1.25.0</version>
+		</dependency>
 		<!--
 			javassist v3.23 is the last version support Java 6
 			DO NOT upgrade javassist version!
