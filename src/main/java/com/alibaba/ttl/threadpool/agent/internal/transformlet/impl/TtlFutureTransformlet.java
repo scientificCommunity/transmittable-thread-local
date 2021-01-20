@@ -44,20 +44,20 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
     private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
 
 
-    private static final String FUNCTION_INVOKE_CLASS_NAME = "io.vertx.core.Future";
+    /*private static final String FUNCTION_INVOKE_CLASS_NAME = "io.vertx.core.Future";
     private static final String FUNCTION_CLASS_NAME = "java.util.function.Function";
-    private static final String TTL_FUNCTION_CLASS_NAME = "com.alibaba.ttl.TtlFunction";
+    private static final String TTL_FUNCTION_CLASS_NAME = "com.alibaba.ttl.TtlFunction";*/
 
     private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.Future";
     private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
     private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
 
+    private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractStream.TransportState";
+
     static {
 
-        CALLBACK_EXECUTOR_CLASS_NAMES.add(FUNCTION_INVOKE_CLASS_NAME);
-//        EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
+        CALLBACK_EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
 
-//        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(FUNCTION_CLASS_NAME, TTL_FUNCTION_CLASS_NAME);
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
 
         EXTRA_MODIFY_CLASS_NAMES.add(HANDLER_CLASS_NAME);

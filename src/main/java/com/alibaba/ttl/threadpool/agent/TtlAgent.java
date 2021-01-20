@@ -140,12 +140,12 @@ public final class TtlAgent {
             transformletList.add(new TtlExecutorTransformlet(disableInheritableForThreadPool));
             transformletList.add(new TtlForkJoinTransformlet(disableInheritableForThreadPool));
 
-            String property = System.getProperty("vertx.support.enable");
+            String property = System.getProperty("vertx.support.enabled");
             //默认不启用
             if (property != null && property.equals(TRUE_STRING)) {
                 transformletList.add(new TtlFutureTransformlet());
             }
-            transformletList.add(new TtlFutureTransformlet());
+
             if (isEnableTimerTask()) transformletList.add(new TtlTimerTaskTransformlet());
 
             final ClassFileTransformer transformer = new TtlTransformer(transformletList);
