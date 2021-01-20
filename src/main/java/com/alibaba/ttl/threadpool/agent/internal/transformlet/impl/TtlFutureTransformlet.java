@@ -52,13 +52,17 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
     private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
     private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
 
-    private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractStream.TransportState";
+    private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractClientStream";
+    private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
+    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.project5e.ttp.ttl.TtlGrpcStreamListener";
 
     static {
 
         CALLBACK_EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
+        CALLBACK_EXECUTOR_CLASS_NAMES.add(GRPC_CALLBACK_INVOKE_CLASS_NAME);
 
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(STREAM_LISTENER_CLASS_NAME, TTL_STREAM_LISTENER_CLASS_NAME);
 
         EXTRA_MODIFY_CLASS_NAMES.add(HANDLER_CLASS_NAME);
     }
@@ -108,6 +112,12 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
                 }*/
                 if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
                     if (!"setHandler".equals(method.getName())) {
+                        return;
+                    }
+                }
+
+                if (paramTypeName.equals(STREAM_LISTENER_CLASS_NAME)) {
+                    if (!"start".equals(method.getName())) {
                         return;
                     }
                 }
