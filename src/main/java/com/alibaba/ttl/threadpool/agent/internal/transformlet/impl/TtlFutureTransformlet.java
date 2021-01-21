@@ -3,7 +3,6 @@ package com.alibaba.ttl.threadpool.agent.internal.transformlet.impl;
 import com.alibaba.ttl.threadpool.agent.internal.logging.Logger;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.ClassInfo;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.JavassistTransformlet;
-import com.sun.xml.internal.bind.v2.TODO;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javassist.CannotCompileException;
@@ -12,7 +11,6 @@ import javassist.CtMethod;
 import javassist.NotFoundException;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLClassLoader;
@@ -66,13 +64,15 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
         final CtClass clazz = classInfo.getCtClass();
         if (CALLBACK_EXECUTOR_CLASS_NAMES.contains(classInfo.getClassName())) {
             try {
-                //todo 2021/1/21 把GRpc的处理拆出去，避免多次尝试加载同一个类
-                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                Method findClass = URLClassLoader.class.getDeclaredMethod("findClass", String.class);
-                findClass.setAccessible(true);
-                findClass.invoke(contextClassLoader, TTL_STREAM_LISTENER_CLASS_NAME_1);
-                Thread.currentThread().getContextClassLoader().loadClass(TTL_STREAM_LISTENER_CLASS_NAME_1);
-            } catch (Exception e) {
+                if (GRPC_CALLBACK_INVOKE_CLASS_NAME.contains(classInfo.getClassName())) {
+                    //todo 2021/1/21 把GRpc的处理拆出去，避免多次尝试加载同一个类
+                    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                    Method findClass = URLClassLoader.class.getDeclaredMethod("findClass", String.class);
+                    findClass.setAccessible(true);
+                    findClass.invoke(contextClassLoader, TTL_STREAM_LISTENER_CLASS_NAME_1);
+                    Thread.currentThread().getContextClassLoader().loadClass(TTL_STREAM_LISTENER_CLASS_NAME_1);
+                }
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
             for (CtMethod method : clazz.getDeclaredMethods()) {
