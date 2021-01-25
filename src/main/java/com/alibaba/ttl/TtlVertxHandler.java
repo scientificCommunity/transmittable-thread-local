@@ -17,8 +17,21 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.alibaba.ttl.TransmittableThreadLocal.Transmitter.*;
 
 /**
+ * {@link TtlVertxHandler} decorate {@link Handler}, so as to get {@link TransmittableThreadLocal}
+ * and transmit it to the time of {@link Handler} execution,
+ * needed when use {@link Handler} to {@link io.vertx.core.Future}.
+ * <p>
+ * we will capture ttl value in another thread by modify {@link io.netty.util.concurrent.SingleThreadEventExecutor#execute(Runnable)},
+ * but we can not capture the ttl value which we expect in callback of identical thread.
+ * the reason of above issue is some async io callback was invoked by the
+ * {@link io.netty.channel.nio.NioEventLoop#run()} rather than the {@link TtlRunnable#run()}
+ *
  * @author: tk
  * @since: 2021/1/14
+ * @see io.netty.channel.nio.NioEventLoop#run()
+ * @see io.netty.channel.nio.NioEventLoop#processSelectedKeys()
+ * @see io.vertx.core.Future
+ * @see TransmittableThreadLocal.Transmitter#restore(Object)
  */
 public class TtlVertxHandler<E> implements Handler<E>, TtlWrapper<Handler<E>>, TtlEnhanced, TtlAttachments {
     private final AtomicReference<Object> capturedRef;
@@ -204,7 +217,7 @@ public class TtlVertxHandler<E> implements Handler<E>, TtlWrapper<Handler<E>>, T
      * so {@code TtlVertxHandler.unwrap(TtlVertxHandler.get(function))} will always return the same input {@code function} object.
      *
      * @see #handle(Object)
-     * @see com.alibaba.ttl.TtlUnwrap#unwrap(Object)
+     * @see TtlUnwrap#unwrap(Object)
      * @since 2.10.2
      */
     @Nullable
