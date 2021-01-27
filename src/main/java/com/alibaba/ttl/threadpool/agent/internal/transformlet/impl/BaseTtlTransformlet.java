@@ -11,9 +11,7 @@ import javassist.CtMethod;
 import javassist.NotFoundException;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,52 +22,21 @@ import static com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.
 
 /**
  * @author: tk
- * @since: 2021/1/15
+ * @since: 2021/1/21
  */
-@Deprecated
-public class TtlFutureTransformlet implements JavassistTransformlet {
+public abstract class BaseTtlTransformlet implements JavassistTransformlet {
+    protected static final Set<String> CALL_CLASS_NAMES = new HashSet<String>();
+    protected static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
+    protected static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
     private static final Logger logger = Logger.getLogger(TtlExecutorTransformlet.class);
-
-    private static final Set<String> CALLBACK_EXECUTOR_CLASS_NAMES = new HashSet<String>();
-
-    private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
-
-    private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.Future";
-    private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
-    private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
-
-    private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractClientStream";
-    private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
-    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.ext.TtlGrpcStreamListener";
-
-    static {
-
-        CALLBACK_EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
-        CALLBACK_EXECUTOR_CLASS_NAMES.add(GRPC_CALLBACK_INVOKE_CLASS_NAME);
-
-        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
-        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(STREAM_LISTENER_CLASS_NAME, TTL_STREAM_LISTENER_CLASS_NAME);
-    }
-
-    public TtlFutureTransformlet() {
-    }
 
     @Override
     public void doTransform(@NonNull final ClassInfo classInfo) throws IOException, NotFoundException, CannotCompileException {
         final CtClass clazz = classInfo.getCtClass();
-        if (CALLBACK_EXECUTOR_CLASS_NAMES.contains(classInfo.getClassName())) {
-            try {
-                if (GRPC_CALLBACK_INVOKE_CLASS_NAME.contains(classInfo.getClassName())) {
-                    //todo 2021/1/21 把GRpc的处理拆出去，避免多次尝试加载同一个类
-                    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                    Method findClass = URLClassLoader.class.getDeclaredMethod("findClass", String.class);
-                    findClass.setAccessible(true);
-                    findClass.invoke(contextClassLoader, TTL_STREAM_LISTENER_CLASS_NAME);
-                    Thread.currentThread().getContextClassLoader().loadClass(TTL_STREAM_LISTENER_CLASS_NAME);
-                }
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
+        if (CALL_CLASS_NAMES.contains(classInfo.getClassName())) {
+
+            //load ttl wrapper class
+            loadClass();
             for (CtMethod method : clazz.getDeclaredMethods()) {
                 updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(method);
             }
@@ -87,33 +54,23 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
     /**
      * @see com.alibaba.ttl.TtlRunnable#get(Runnable, boolean, boolean)
      * @see com.alibaba.ttl.TtlCallable#get(Callable, boolean, boolean)
-     * @see com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils#setAutoWrapperAttachment(Object)
+     * @see Utils#setAutoWrapperAttachment(Object)
      */
     @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE") // [ERROR] Format string should use %n rather than \n
     private void updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(@NonNull final CtMethod method) throws NotFoundException, CannotCompileException {
         final int modifiers = method.getModifiers();
-        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) return;
+        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) {
+            return;
+        }
 
         CtClass[] parameterTypes = method.getParameterTypes();
         StringBuilder insertCode = new StringBuilder();
         for (int i = 0; i < parameterTypes.length; i++) {
             final String paramTypeName = parameterTypes[i].getName();
             if (PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.containsKey(paramTypeName)) {
-                /*if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
-                    if (!"request".equals(method.getName())) {
-                        return;
-                    }
-                }*/
-                if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
-                    if (!"setHandler".equals(method.getName())) {
-                        return;
-                    }
-                }
 
-                if (paramTypeName.equals(STREAM_LISTENER_CLASS_NAME)) {
-                    if (!"start".equals(method.getName())) {
-                        return;
-                    }
+                if (!needDecorateToTtlWrapper(method.getName())) {
+                    return;
                 }
                 String code = String.format(
                     // decorate to TTL wrapper,
@@ -125,6 +82,42 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
                 insertCode.append(code);
             }
         }
-        if (insertCode.length() > 0) method.insertBefore(insertCode.toString());
+        if (insertCode.length() > 0) {
+            method.insertBefore(insertCode.toString());
+        }
     }
+
+    /**
+     * Template method which can be overridden to load specific class.
+     * call on {@link #doTransform(ClassInfo)}
+     * <p>
+     * current project was added to boot classpath path.
+     * so there will be throw {@link NoClassDefFoundError}
+     * when {@link BaseTtlTransformlet#updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(CtMethod)}
+     * try to load the class that related some class that was loaded By AppClassLoader.
+     *
+     * @see NoClassDefFoundError
+     * @see com.alibaba.ttl.TtlVertxHandler
+     * @see io.vertx.core.Handler
+     * @see sun.misc.Launcher.AppClassLoader
+     */
+    protected void loadClass() {
+        // For subclasses: do nothing by default.
+    }
+
+    ;
+
+    /**
+     * if it is true, the method that belong to some class which from CALL_CLASS_NAMES will be modified
+     *
+     * @param methodName method from {@link #CALL_CLASS_NAMES}
+     * @return .
+     * @see BaseTtlTransformlet#updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(CtMethod)
+     */
+    protected boolean needDecorateToTtlWrapper(String methodName) {
+        // For subclasses: return true by default.
+        return true;
+    }
+
+    ;
 }
