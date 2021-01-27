@@ -92,7 +92,8 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
     @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE") // [ERROR] Format string should use %n rather than \n
     private void updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(@NonNull final CtMethod method) throws NotFoundException, CannotCompileException {
         final int modifiers = method.getModifiers();
-        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) return;
+        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers) || Modifier.isAbstract(modifiers)) return;
+//        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) return;
 
         CtClass[] parameterTypes = method.getParameterTypes();
         StringBuilder insertCode = new StringBuilder();
@@ -104,7 +105,7 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
                         return;
                     }
                 }*/
-                if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
+                /*if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
                     if (!"setHandler".equals(method.getName())) {
                         return;
                     }
@@ -114,7 +115,7 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
                     if (!"start".equals(method.getName())) {
                         return;
                     }
-                }
+                }*/
                 String code = String.format(
                     // decorate to TTL wrapper,
                     // and then set AutoWrapper attachment/Tag
