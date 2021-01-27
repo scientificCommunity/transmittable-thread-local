@@ -2,10 +2,7 @@ package com.alibaba.ttl.threadpool.agent;
 
 import com.alibaba.ttl.threadpool.agent.internal.logging.Logger;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.JavassistTransformlet;
-import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlExecutorTransformlet;
-import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlForkJoinTransformlet;
-import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlFutureTransformlet;
-import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlTimerTaskTransformlet;
+import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.*;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 
@@ -115,6 +112,9 @@ import java.util.logging.Level;
  * @since 0.9.0
  */
 public final class TtlAgent {
+
+    private static final String TRUE_STRING = "true";
+
     /**
      * Entrance method of TTL Java Agent.
      *
@@ -136,7 +136,10 @@ public final class TtlAgent {
             final List<JavassistTransformlet> transformletList = new ArrayList<JavassistTransformlet>();
             transformletList.add(new TtlExecutorTransformlet(disableInheritableForThreadPool));
             transformletList.add(new TtlForkJoinTransformlet(disableInheritableForThreadPool));
-            transformletList.add(new TtlFutureTransformlet());
+
+            transformletList.add(new TtlVertxFutureTransformlet());
+            transformletList.add(new TtlStreamTransformlet());
+
             if (isEnableTimerTask()) transformletList.add(new TtlTimerTaskTransformlet());
 
             final ClassFileTransformer transformer = new TtlTransformer(transformletList);

@@ -11,7 +11,9 @@ import javassist.CtMethod;
 import javassist.NotFoundException;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,43 +26,29 @@ import static com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.
  * @author: tk
  * @since: 2021/1/15
  */
+@Deprecated
 public class TtlFutureTransformlet implements JavassistTransformlet {
     private static final Logger logger = Logger.getLogger(TtlExecutorTransformlet.class);
 
-    /**
-     * 修饰匿名executor
-     * key:创建匿名executor的类
-     * value:创建匿名executor的行号
-     */
-    private static final Map<String, Integer> ANONYMOUS_EXECUTOR_CLASS_NAME_AND_LINE = new HashMap<String, Integer>();
     private static final Set<String> CALLBACK_EXECUTOR_CLASS_NAMES = new HashSet<String>();
 
-    /**
-     * 需要额外修改的由AppClassLoader加载的类
-     * 避免出现因类加载器不一致导致的ClassDefNotFoundException
-     */
-    private static final Set<String> EXTRA_MODIFY_CLASS_NAMES = new HashSet<String>();
-
     private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
-
-
-    private static final String FUNCTION_INVOKE_CLASS_NAME = "io.vertx.core.Future";
-    private static final String FUNCTION_CLASS_NAME = "java.util.function.Function";
-    private static final String TTL_FUNCTION_CLASS_NAME = "com.alibaba.ttl.TtlFunction";
 
     private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.Future";
     private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
     private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
 
+    private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractClientStream";
+    private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
+    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.ext.TtlGrpcStreamListener";
+
     static {
 
-        CALLBACK_EXECUTOR_CLASS_NAMES.add(FUNCTION_INVOKE_CLASS_NAME);
-//        EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
+        CALLBACK_EXECUTOR_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
+        CALLBACK_EXECUTOR_CLASS_NAMES.add(GRPC_CALLBACK_INVOKE_CLASS_NAME);
 
-//        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(FUNCTION_CLASS_NAME, TTL_FUNCTION_CLASS_NAME);
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
-
-        EXTRA_MODIFY_CLASS_NAMES.add(HANDLER_CLASS_NAME);
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(STREAM_LISTENER_CLASS_NAME, TTL_STREAM_LISTENER_CLASS_NAME);
     }
 
     public TtlFutureTransformlet() {
@@ -70,12 +58,22 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
     public void doTransform(@NonNull final ClassInfo classInfo) throws IOException, NotFoundException, CannotCompileException {
         final CtClass clazz = classInfo.getCtClass();
         if (CALLBACK_EXECUTOR_CLASS_NAMES.contains(classInfo.getClassName())) {
+            try {
+                if (GRPC_CALLBACK_INVOKE_CLASS_NAME.contains(classInfo.getClassName())) {
+                    //todo 2021/1/21 把GRpc的处理拆出去，避免多次尝试加载同一个类
+                    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                    Method findClass = URLClassLoader.class.getDeclaredMethod("findClass", String.class);
+                    findClass.setAccessible(true);
+                    findClass.invoke(contextClassLoader, TTL_STREAM_LISTENER_CLASS_NAME);
+                    Thread.currentThread().getContextClassLoader().loadClass(TTL_STREAM_LISTENER_CLASS_NAME);
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
             for (CtMethod method : clazz.getDeclaredMethods()) {
                 updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(method);
             }
 
-            classInfo.setModified();
-        } else if (EXTRA_MODIFY_CLASS_NAMES.contains(classInfo.getClassName())) {
             classInfo.setModified();
         } else {
             if (clazz.isPrimitive() || clazz.isArray() || clazz.isInterface() || clazz.isAnnotation()) {
@@ -94,7 +92,8 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
     @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE") // [ERROR] Format string should use %n rather than \n
     private void updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(@NonNull final CtMethod method) throws NotFoundException, CannotCompileException {
         final int modifiers = method.getModifiers();
-        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) return;
+        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers) || Modifier.isAbstract(modifiers)) return;
+//        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) return;
 
         CtClass[] parameterTypes = method.getParameterTypes();
         StringBuilder insertCode = new StringBuilder();
@@ -106,11 +105,17 @@ public class TtlFutureTransformlet implements JavassistTransformlet {
                         return;
                     }
                 }*/
-                if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
+                /*if (paramTypeName.equals(HANDLER_CLASS_NAME)) {
                     if (!"setHandler".equals(method.getName())) {
                         return;
                     }
                 }
+
+                if (paramTypeName.equals(STREAM_LISTENER_CLASS_NAME)) {
+                    if (!"start".equals(method.getName())) {
+                        return;
+                    }
+                }*/
                 String code = String.format(
                     // decorate to TTL wrapper,
                     // and then set AutoWrapper attachment/Tag
