@@ -16,12 +16,18 @@ public class TtlStreamTransformlet extends BaseTtlTransformlet {
     private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
     private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.ext.TtlGrpcStreamListener";
 
+    private static final String GRPC_DELAY_STREAM_INVOKE_CLASS_NAME = "io.grpc.internal.DelayedStream";
+    private static final String RUNNABLE_CLASS_NAME = "java.lang.Runnable";
+    private static final String TTL_RUNNABLE_CLASS_NAME = "com.alibaba.ttl.TtlRunnable";
+
     private static final String DECORATE_SET_HANDLER_METHOD = "setHandler";
 
     static {
         CALL_CLASS_NAMES.add(GRPC_CALLBACK_INVOKE_CLASS_NAME);
+        CALL_CLASS_NAMES.add(GRPC_DELAY_STREAM_INVOKE_CLASS_NAME);
 
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(STREAM_LISTENER_CLASS_NAME, TTL_STREAM_LISTENER_CLASS_NAME);
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(RUNNABLE_CLASS_NAME, TTL_RUNNABLE_CLASS_NAME);
 
         DECORATE_METHODS_NAME.add(DECORATE_SET_HANDLER_METHOD);
     }
