@@ -5,6 +5,10 @@ import com.alibaba.ttl.threadpool.agent.internal.transformlet.JavassistTransform
 
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * TTL {@link JavassistTransformlet} for {@link io.vertx.core.Handler}.
@@ -18,6 +22,9 @@ import java.net.URLClassLoader;
  */
 public class TtlVertxFutureTransformlet extends BaseTtlTransformlet {
     private static final Logger LOGGER = Logger.getLogger(TtlVertxFutureTransformlet.class);
+    private static final Set<String> CALL_CLASS_NAMES = new HashSet<String>();
+    private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
+    private static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
 
     private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.Future";
     private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
@@ -49,5 +56,20 @@ public class TtlVertxFutureTransformlet extends BaseTtlTransformlet {
     @Override
     protected boolean needDecorateToTtlWrapper(String methodName) {
         return DECORATE_METHODS_NAME.contains(methodName);
+    }
+
+    @Override
+    protected Set<String> getCallClassNames() {
+        return CALL_CLASS_NAMES;
+    }
+
+    @Override
+    protected Set<String> getDecorateMethodsName() {
+        return DECORATE_METHODS_NAME;
+    }
+
+    @Override
+    protected Map<String, String> getParamTypeNameToDecorateMethodClass() {
+        return PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS;
     }
 }

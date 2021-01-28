@@ -4,30 +4,36 @@ import com.alibaba.ttl.threadpool.agent.internal.logging.Logger;
 
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author: tk
  * @since: 2021/1/27
  */
 public class TtlStreamTransformlet extends BaseTtlTransformlet {
-    private static final Logger LOGGER = Logger.getLogger(TtlVertxFutureTransformlet.class);
+    private static final Logger LOGGER = Logger.getLogger(TtlStreamTransformlet.class);
+    private static final Set<String> CALL_CLASS_NAMES = new HashSet<String>();
+    private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
+    private static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
 
     private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractClientStream";
     private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
-    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.ext.TtlGrpcStreamListener";
+    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.TtlGrpcClientStreamListener";
 
     private static final String GRPC_DELAY_STREAM_INVOKE_CLASS_NAME = "io.grpc.internal.DelayedStream";
-    private static final String RUNNABLE_CLASS_NAME = "java.lang.Runnable";
-    private static final String TTL_RUNNABLE_CLASS_NAME = "com.alibaba.ttl.TtlRunnable";
+    private static final String GRPC_DELAY_STREAM_INVOKE_CLASS_NAME1 = "io.grpc.internal.DelayedClientTransport$PendingStream";
 
     private static final String DECORATE_SET_HANDLER_METHOD = "setHandler";
 
     static {
         CALL_CLASS_NAMES.add(GRPC_CALLBACK_INVOKE_CLASS_NAME);
         CALL_CLASS_NAMES.add(GRPC_DELAY_STREAM_INVOKE_CLASS_NAME);
+        CALL_CLASS_NAMES.add(GRPC_DELAY_STREAM_INVOKE_CLASS_NAME1);
 
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(STREAM_LISTENER_CLASS_NAME, TTL_STREAM_LISTENER_CLASS_NAME);
-        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(RUNNABLE_CLASS_NAME, TTL_RUNNABLE_CLASS_NAME);
 
         DECORATE_METHODS_NAME.add(DECORATE_SET_HANDLER_METHOD);
     }
@@ -46,7 +52,17 @@ public class TtlStreamTransformlet extends BaseTtlTransformlet {
     }
 
     @Override
-    protected boolean needDecorateToTtlWrapper(String methodName) {
-        return DECORATE_METHODS_NAME.contains(methodName);
+    protected Set<String> getCallClassNames() {
+        return CALL_CLASS_NAMES;
+    }
+
+    @Override
+    protected Set<String> getDecorateMethodsName() {
+        return DECORATE_METHODS_NAME;
+    }
+
+    @Override
+    protected Map<String, String> getParamTypeNameToDecorateMethodClass() {
+        return PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS;
     }
 }

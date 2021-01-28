@@ -1,6 +1,5 @@
-package com.alibaba.ttl.ext;
+package com.alibaba.ttl;
 
-import com.alibaba.ttl.TtlUnwrap;
 import com.alibaba.ttl.spi.TtlAttachments;
 import com.alibaba.ttl.spi.TtlAttachmentsDelegate;
 import com.alibaba.ttl.spi.TtlEnhanced;
@@ -22,56 +21,56 @@ import static com.alibaba.ttl.TransmittableThreadLocal.Transmitter.*;
  * @author: tk
  * @since: 2021/1/20
  */
-public class TtlGrpcStreamListener implements ClientStreamListener, TtlWrapper<ClientStreamListener>, TtlEnhanced, TtlAttachments {
+public class TtlGrpcClientStreamListener implements ClientStreamListener, TtlWrapper<ClientStreamListener>, TtlEnhanced, TtlAttachments {
     private final ClientStreamListener listener;
     private final AtomicReference<Object> capturedRef;
     private final boolean releaseTtlValueReferenceAfterRun;
     private final TtlAttachmentsDelegate ttlAttachment = new TtlAttachmentsDelegate();
 
-    private TtlGrpcStreamListener(ClientStreamListener listener, boolean releaseTtlValueReferenceAfterRun) {
+    private TtlGrpcClientStreamListener(ClientStreamListener listener, boolean releaseTtlValueReferenceAfterRun) {
         this.capturedRef = new AtomicReference<Object>(capture());
         this.listener = listener;
         this.releaseTtlValueReferenceAfterRun = releaseTtlValueReferenceAfterRun;
     }
 
     /**
-     * Factory method, wrap input {@link ClientStreamListener} to {@link TtlGrpcStreamListener}.
+     * Factory method, wrap input {@link ClientStreamListener} to {@link TtlGrpcClientStreamListener}.
      *
      * @param listener input {@link ClientStreamListener}. if input is {@code null}, return {@code null}.
      * @return Wrapped {@link ClientStreamListener}
-     * @throws IllegalStateException when input is {@link TtlGrpcStreamListener} already.
+     * @throws IllegalStateException when input is {@link TtlGrpcClientStreamListener} already.
      */
 
-    public static TtlGrpcStreamListener get(ClientStreamListener listener) {
+    public static TtlGrpcClientStreamListener get(ClientStreamListener listener) {
         return get(listener, false, false);
     }
 
     /**
-     * Factory method, wrap input {@link ClientStreamListener} to {@link TtlGrpcStreamListener}.
+     * Factory method, wrap input {@link ClientStreamListener} to {@link TtlGrpcClientStreamListener}.
      *
      * @param listener                         input {@link ClientStreamListener}. if input is {@code null}, return {@code null}.
-     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcStreamListener} is referred.
+     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcClientStreamListener} is referred.
      * @return Wrapped {@link ClientStreamListener}
-     * @throws IllegalStateException when input is {@link TtlGrpcStreamListener} already.
+     * @throws IllegalStateException when input is {@link TtlGrpcClientStreamListener} already.
      */
 
-    public static TtlGrpcStreamListener get(ClientStreamListener listener, boolean releaseTtlValueReferenceAfterRun) {
+    public static TtlGrpcClientStreamListener get(ClientStreamListener listener, boolean releaseTtlValueReferenceAfterRun) {
         return get(listener, releaseTtlValueReferenceAfterRun, false);
     }
 
     /**
-     * Factory method, wrap input {@link ClientStreamListener} to {@link TtlGrpcStreamListener}.
+     * Factory method, wrap input {@link ClientStreamListener} to {@link TtlGrpcClientStreamListener}.
      *
      * @param listener                         input {@link ClientStreamListener}. if input is {@code null}, return {@code null}.
-     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcStreamListener} is referred.
-     * @param idempotent                       is idempotent mode or not. if {@code true}, just return input {@link ClientStreamListener} when it's {@link TtlGrpcStreamListener},
+     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcClientStreamListener} is referred.
+     * @param idempotent                       is idempotent mode or not. if {@code true}, just return input {@link ClientStreamListener} when it's {@link TtlGrpcClientStreamListener},
      *                                         otherwise throw {@link IllegalStateException}.
      *                                         <B><I>Caution</I></B>: {@code true} will cover up bugs! <b>DO NOT</b> set, only when you know why.
      * @return Wrapped {@link ClientStreamListener}
-     * @throws IllegalStateException when input is {@link TtlGrpcStreamListener} already and not idempotent.
+     * @throws IllegalStateException when input is {@link TtlGrpcClientStreamListener} already and not idempotent.
      */
 
-    public static TtlGrpcStreamListener get(ClientStreamListener listener, boolean releaseTtlValueReferenceAfterRun, boolean idempotent) {
+    public static TtlGrpcClientStreamListener get(ClientStreamListener listener, boolean releaseTtlValueReferenceAfterRun, boolean idempotent) {
         if (null == listener) {
             return null;
         }
@@ -79,66 +78,66 @@ public class TtlGrpcStreamListener implements ClientStreamListener, TtlWrapper<C
         if (listener instanceof TtlEnhanced) {
             // avoid redundant decoration, and ensure idempotency
             if (idempotent) {
-                return (TtlGrpcStreamListener) listener;
+                return (TtlGrpcClientStreamListener) listener;
             } else {
                 throw new IllegalStateException("Already TtlGrpcStreamListener!");
             }
         }
-        return new TtlGrpcStreamListener(listener, releaseTtlValueReferenceAfterRun);
+        return new TtlGrpcClientStreamListener(listener, releaseTtlValueReferenceAfterRun);
     }
 
     /**
-     * wrap input {@link ClientStreamListener} Collection to {@link TtlGrpcStreamListener} Collection.
+     * wrap input {@link ClientStreamListener} Collection to {@link TtlGrpcClientStreamListener} Collection.
      *
      * @param tasks task to be wrapped. if input is {@code null}, return {@code null}.
      * @return wrapped tasks
-     * @throws IllegalStateException when input is {@link TtlGrpcStreamListener} already.
+     * @throws IllegalStateException when input is {@link TtlGrpcClientStreamListener} already.
      */
-    public static List<TtlGrpcStreamListener> gets(Collection<? extends ClientStreamListener> tasks) {
+    public static List<TtlGrpcClientStreamListener> gets(Collection<? extends ClientStreamListener> tasks) {
         return gets(tasks, false, false);
     }
 
     /**
-     * wrap input {@link ClientStreamListener} Collection to {@link TtlGrpcStreamListener} Collection.
+     * wrap input {@link ClientStreamListener} Collection to {@link TtlGrpcClientStreamListener} Collection.
      *
      * @param tasks                            task to be wrapped. if input is {@code null}, return {@code null}.
-     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcStreamListener} is referred.
+     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcClientStreamListener} is referred.
      * @return wrapped tasks
-     * @throws IllegalStateException when input is {@link TtlGrpcStreamListener} already.
+     * @throws IllegalStateException when input is {@link TtlGrpcClientStreamListener} already.
      */
-    public static List<TtlGrpcStreamListener> gets(Collection<? extends ClientStreamListener> tasks, boolean releaseTtlValueReferenceAfterRun) {
+    public static List<TtlGrpcClientStreamListener> gets(Collection<? extends ClientStreamListener> tasks, boolean releaseTtlValueReferenceAfterRun) {
         return gets(tasks, releaseTtlValueReferenceAfterRun, false);
     }
 
     /**
-     * wrap input {@link ClientStreamListener} Collection to {@link TtlGrpcStreamListener} Collection.
+     * wrap input {@link ClientStreamListener} Collection to {@link TtlGrpcClientStreamListener} Collection.
      *
      * @param tasks                            task to be wrapped. if input is {@code null}, return {@code null}.
-     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcStreamListener} is referred.
-     * @param idempotent                       is idempotent mode or not. if {@code true}, just return input {@link ClientStreamListener} when it's {@link TtlGrpcStreamListener},
+     * @param releaseTtlValueReferenceAfterRun release TTL value reference after run, avoid memory leak even if {@link TtlGrpcClientStreamListener} is referred.
+     * @param idempotent                       is idempotent mode or not. if {@code true}, just return input {@link ClientStreamListener} when it's {@link TtlGrpcClientStreamListener},
      *                                         otherwise throw {@link IllegalStateException}.
      *                                         <B><I>Caution</I></B>: {@code true} will cover up bugs! <b>DO NOT</b> set, only when you know why.
      * @return wrapped tasks
-     * @throws IllegalStateException when input is {@link TtlGrpcStreamListener} already and not idempotent.
+     * @throws IllegalStateException when input is {@link TtlGrpcClientStreamListener} already and not idempotent.
      */
 
-    public static List<TtlGrpcStreamListener> gets(Collection<? extends ClientStreamListener> tasks, boolean releaseTtlValueReferenceAfterRun, boolean idempotent) {
+    public static List<TtlGrpcClientStreamListener> gets(Collection<? extends ClientStreamListener> tasks, boolean releaseTtlValueReferenceAfterRun, boolean idempotent) {
         if (null == tasks) {
             return Collections.emptyList();
         }
 
-        List<TtlGrpcStreamListener> copy = new ArrayList<TtlGrpcStreamListener>();
+        List<TtlGrpcClientStreamListener> copy = new ArrayList<TtlGrpcClientStreamListener>();
         for (ClientStreamListener task : tasks) {
-            copy.add(TtlGrpcStreamListener.get(task, releaseTtlValueReferenceAfterRun, idempotent));
+            copy.add(TtlGrpcClientStreamListener.get(task, releaseTtlValueReferenceAfterRun, idempotent));
         }
         return copy;
     }
 
     /**
-     * Unwrap {@link TtlGrpcStreamListener} to the original/underneath one.
+     * Unwrap {@link TtlGrpcClientStreamListener} to the original/underneath one.
      * <p>
      * this method is {@code null}-safe, when input {@code Function} parameter is {@code null}, return {@code null};
-     * if input {@code Function} parameter is not a {@link TtlGrpcStreamListener} just return input {@code Function}.
+     * if input {@code Function} parameter is not a {@link TtlGrpcClientStreamListener} just return input {@code Function}.
      * <p>
      * so {@code TtlGrpcStreamListener.unwrap(TtlGrpcStreamListener.get(function))} will always return the same input {@code function} object.
      *
@@ -148,15 +147,15 @@ public class TtlGrpcStreamListener implements ClientStreamListener, TtlWrapper<C
      */
 
     public static ClientStreamListener unwrap(ClientStreamListener listener) {
-        if (!(listener instanceof TtlGrpcStreamListener)) {
+        if (!(listener instanceof TtlGrpcClientStreamListener)) {
             return listener;
         } else {
-            return ((TtlGrpcStreamListener) listener).getListener();
+            return ((TtlGrpcClientStreamListener) listener).getListener();
         }
     }
 
     /**
-     * Unwrap {@link TtlGrpcStreamListener} to the original/underneath one for collection.
+     * Unwrap {@link TtlGrpcClientStreamListener} to the original/underneath one for collection.
      * <p>
      * Invoke {@link #unwrap(ClientStreamListener)} for each element in input collection.
      * <p>
@@ -174,10 +173,10 @@ public class TtlGrpcStreamListener implements ClientStreamListener, TtlWrapper<C
 
         List<ClientStreamListener> copy = new ArrayList<ClientStreamListener>();
         for (ClientStreamListener task : tasks) {
-            if (!(task instanceof TtlGrpcStreamListener)) {
+            if (!(task instanceof TtlGrpcClientStreamListener)) {
                 copy.add(task);
             } else {
-                copy.add(((TtlGrpcStreamListener) task).getListener());
+                copy.add(((TtlGrpcClientStreamListener) task).getListener());
             }
         }
         return copy;
@@ -232,7 +231,7 @@ public class TtlGrpcStreamListener implements ClientStreamListener, TtlWrapper<C
             return false;
         }
 
-        TtlGrpcStreamListener that = (TtlGrpcStreamListener) o;
+        TtlGrpcClientStreamListener that = (TtlGrpcClientStreamListener) o;
 
         return listener.equals(that.listener);
     }

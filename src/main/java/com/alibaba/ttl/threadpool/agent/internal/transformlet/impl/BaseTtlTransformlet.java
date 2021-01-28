@@ -25,15 +25,12 @@ import static com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.
  * @since: 2021/1/21
  */
 public abstract class BaseTtlTransformlet implements JavassistTransformlet {
-    protected static final Set<String> CALL_CLASS_NAMES = new HashSet<String>();
-    protected static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
-    protected static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
     private static final Logger logger = Logger.getLogger(TtlExecutorTransformlet.class);
 
     @Override
     public void doTransform(@NonNull final ClassInfo classInfo) throws IOException, NotFoundException, CannotCompileException {
         final CtClass clazz = classInfo.getCtClass();
-        if (CALL_CLASS_NAMES.contains(classInfo.getClassName())) {
+        if (getCallClassNames().contains(classInfo.getClassName())) {
 
             //load ttl wrapper class
             loadClass();
@@ -59,7 +56,7 @@ public abstract class BaseTtlTransformlet implements JavassistTransformlet {
     @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE") // [ERROR] Format string should use %n rather than \n
     private void updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(@NonNull final CtMethod method) throws NotFoundException, CannotCompileException {
         final int modifiers = method.getModifiers();
-        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers)) {
+        if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers) || Modifier.isAbstract(modifiers)) {
             return;
         }
 
@@ -67,7 +64,7 @@ public abstract class BaseTtlTransformlet implements JavassistTransformlet {
         StringBuilder insertCode = new StringBuilder();
         for (int i = 0; i < parameterTypes.length; i++) {
             final String paramTypeName = parameterTypes[i].getName();
-            if (PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.containsKey(paramTypeName)) {
+            if (getParamTypeNameToDecorateMethodClass().containsKey(paramTypeName)) {
 
                 if (!needDecorateToTtlWrapper(method.getName())) {
                     return;
@@ -77,7 +74,7 @@ public abstract class BaseTtlTransformlet implements JavassistTransformlet {
                     // and then set AutoWrapper attachment/Tag
                     "$%d = %s.get($%1$d, false, true);"
                         + "\ncom.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.setAutoWrapperAttachment($%1$d);",
-                    i + 1, PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.get(paramTypeName));
+                    i + 1, getParamTypeNameToDecorateMethodClass().get(paramTypeName));
                 logger.info("insert code before method " + signatureOfMethod(method) + " of class " + method.getDeclaringClass().getName() + ": " + code);
                 insertCode.append(code);
             }
@@ -110,7 +107,7 @@ public abstract class BaseTtlTransformlet implements JavassistTransformlet {
     /**
      * if it is true, the method that belong to some class which from CALL_CLASS_NAMES will be modified
      *
-     * @param methodName method from {@link #CALL_CLASS_NAMES}
+     * @param methodName method from {@link #getCallClassNames}
      * @return .
      * @see BaseTtlTransformlet#updateSubmitMethodsOfExecutorClass_decorateToTtlWrapperAndSetAutoWrapperAttachment(CtMethod)
      */
@@ -119,5 +116,7 @@ public abstract class BaseTtlTransformlet implements JavassistTransformlet {
         return true;
     }
 
-    ;
+    protected abstract Set<String> getCallClassNames();
+    protected abstract Set<String> getDecorateMethodsName();
+    protected abstract Map<String, String> getParamTypeNameToDecorateMethodClass();
 }
