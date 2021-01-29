@@ -116,6 +116,5 @@ public abstract class BaseTtlTransformlet implements TtlTransformlet {
     }
 
     protected abstract Set<String> getCallClassNames();
-    protected abstract Set<String> getDecorateMethodsName();
     protected abstract Map<String, String> getParamTypeNameToDecorateMethodClass();
 }

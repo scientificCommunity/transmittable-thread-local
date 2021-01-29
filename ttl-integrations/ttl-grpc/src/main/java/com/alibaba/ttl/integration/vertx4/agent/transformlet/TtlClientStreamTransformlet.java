@@ -19,7 +19,6 @@ public class TtlClientStreamTransformlet extends BaseTtlTransformlet {
     private static final Logger LOGGER = Logger.getLogger(TtlClientStreamTransformlet.class);
     private static final Set<String> CALL_CLASS_NAMES = new HashSet<String>();
     private static final Map<String, String> PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS = new HashMap<String, String>();
-    private static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
 
     private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractClientStream";
     private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
@@ -50,11 +49,6 @@ public class TtlClientStreamTransformlet extends BaseTtlTransformlet {
     @Override
     protected Set<String> getCallClassNames() {
         return CALL_CLASS_NAMES;
-    }
-
-    @Override
-    protected Set<String> getDecorateMethodsName() {
-        return DECORATE_METHODS_NAME;
     }
 
     @Override
