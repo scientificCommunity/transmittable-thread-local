@@ -15,6 +15,11 @@
 	<url>https://github.com/alibaba/transmittable-thread-local</url>
 	<inceptionYear>2013</inceptionYear>
 
+	<modules>
+		<module>ttl-integrations/ttl-vertx4</module>
+		<module>ttl-integrations/ttl-grpc</module>
+	</modules>
+
 	<licenses>
 		<license>
 			<name>Apache 2</name>
