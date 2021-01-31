@@ -12,8 +12,6 @@ import javassist.NotFoundException;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -25,7 +23,7 @@ import static com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.
  * @since: 2021/1/21
  */
 public abstract class BaseTtlTransformlet implements JavassistTransformlet {
-    private static final Logger logger = Logger.getLogger(TtlExecutorTransformlet.class);
+    private static final Logger logger = Logger.getLogger(BaseTtlTransformlet.class);
 
     @Override
     public void doTransform(@NonNull final ClassInfo classInfo) throws IOException, NotFoundException, CannotCompileException {
