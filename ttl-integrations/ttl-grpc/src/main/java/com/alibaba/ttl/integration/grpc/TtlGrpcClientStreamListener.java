@@ -5,9 +5,12 @@ import com.alibaba.ttl.spi.TtlAttachments;
 import com.alibaba.ttl.spi.TtlAttachmentsDelegate;
 import com.alibaba.ttl.spi.TtlEnhanced;
 import com.alibaba.ttl.spi.TtlWrapper;
+import com.alibaba.ttl.threadpool.agent.transformlet.TtlTransformlet;
+import io.grpc.ClientCall;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.internal.ClientStreamListener;
+import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,8 +21,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.alibaba.ttl.TransmittableThreadLocal.Transmitter.*;
 
 /**
+ * {@link TtlTransformlet} for {@link ClientStreamListener}.
+ *
  * @author: tk (305809299 at qq dot com)
- * @since: 2021/1/20
+ * @see io.grpc.stub.ClientCalls
+ * @see io.grpc.internal.DelayedStream
+ * @see io.grpc.internal.AbstractClientStream
+ * @see io.grpc.internal.ClientStreamListener
+ * @see com.alibaba.ttl.integration.grpc.agent.transformlet.GrpcClientStreamTransformlet
  */
 public class TtlGrpcClientStreamListener implements ClientStreamListener, TtlWrapper<ClientStreamListener>, TtlEnhanced, TtlAttachments {
     private final ClientStreamListener listener;

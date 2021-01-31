@@ -20,6 +20,10 @@ import static com.alibaba.ttl.threadpool.agent.transformlet.helper.TtlTransforml
  * {@link TtlTransformlet} for {@link io.grpc.internal.AbstractClientStream} and {@link io.grpc.internal.DelayedStream}.
  *
  * @author tk (305809299 at qq dot com)
+ * @see io.grpc.stub.ClientCalls
+ * @see io.grpc.internal.DelayedStream
+ * @see io.grpc.internal.AbstractClientStream
+ * @see io.grpc.internal.ClientStreamListener
  */
 public class GrpcClientStreamTransformlet implements TtlTransformlet {
     private static final Logger logger = Logger.getLogger(GrpcClientStreamTransformlet.class);

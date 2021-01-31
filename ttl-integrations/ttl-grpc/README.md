@@ -1,52 +1,15 @@
-# Vertx 4的TTL集成
+## Grpc 的TTL集成
+该集成是为了保证在`Grpc client`的**异步调用的回调中**能够正确拿到预设好的`ttl context`<br/>
+目前支持的`Grpc`版本为`1.28.1`
+### 1.1 修饰`io.grpc.internal.ClientStreamListener`
 
-## 1. 保证异步io回调中传递值
+使用[`TtlGrpcClientStreamListener`](src/main/java/com/alibaba/ttl/integration/grpc/TtlGrpcClientStreamListener.java)来修饰传入的`Listener`。
 
-### 1.1 vert.x内的回调处理
+### 1.2 修改执行器类
 
-#### 修饰`io.vertx.core.Handler`
-
-使用[`TtlVertxHandler`](src/main/java/com/alibaba/ttl/integration/grpc/TtlVertxHandler.java)来修饰传入的`Handler`。
-
-示例代码：
-
-```java
-Vertx vertx = Vertx.vertx();
-
-//build channel
-ManagedChannel channel = VertxChannelBuilder
-  .forAddress(vertx, "localhost", 8080)
-  .usePlaintext()
-  .build();
-
-// set in parent thread
-TransmittableThreadLocal<String> context = new TransmittableThreadLocal<>();
-context.set("value-set-in-parent");
-
-//init stub
-io.grpc.stub.XXX stub = XXX.newVertxStub(channel);
-HelloRequest request = HelloRequest.newBuilder().setName("Julien").build();
-
-//init handler
-Handler<AsyncResult<String>> handler = event -> {
-  // read in callback, value is "value-set-in-parent"
-  context.get();
-  if (event.succeeded()) {
-    //do something
-  } else {
-    // find exception
-  }
-};
-// extra work, create decorated TtlVertxHandler object
-TtlVertxHandler<AsyncResult<String>> ttlVertxHandler = TtlVertxHandler.get(handler);
-
-//send request
-stub.sayHello(request).onComplete(ttlVertxHandler);
-```
-
-### 1.2 修饰`io.vertx.core.Future`
-
-修饰了的Vert.x执行器组件如下:
-- `io.vertx.core.Future`
-    - 修饰实现代码在[`TtlVertxFutureTransformlet.java`](src/main/java/com/alibaba/ttl/threadpool/agent/internal/transformlet/impl/TtlVertxFutureTransformlet.java)。
+修饰了的Grpc执行器组件如下:
+- `io.grpc.internal.AbstractClientStream`
+- `io.grpc.internal.DelayedStream`
+---
+- 修饰实现代码在[`GrpcClientStreamTransformlet.java`](src/main/java/com/alibaba/ttl/integration/grpc/agent/transformlet/GrpcClientStreamTransformlet.java)。
     

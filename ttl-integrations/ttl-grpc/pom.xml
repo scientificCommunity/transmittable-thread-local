@@ -28,7 +28,13 @@
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-core</artifactId>
-			<version>1.25.0</version>
+			<version>1.28.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>1.28.1</version>
 		</dependency>
 		<!--
 			JSR305 is already Dormant status, so SpotBugs does not release jsr305 jar file.
