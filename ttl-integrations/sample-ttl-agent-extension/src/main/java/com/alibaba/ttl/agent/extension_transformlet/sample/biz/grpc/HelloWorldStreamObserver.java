@@ -13,8 +13,8 @@ public class HelloWorldStreamObserver implements StreamObserver<HelloReply> {
 
     @Override
     public void onNext(HelloReply s) {
-        logger.info("======================="+ContextUtils.getThreadLocal()+"=======================");
-        logger.info("+++++++++++++++++++++++"+ContextUtils.getTtlThreadLocal()+"+++++++++++++++++++++++");
+        logger.info("=======================" + ContextUtils.getThreadLocal() + "=======================" + Thread.currentThread().getName());
+        logger.info("+++++++++++++++++++++++" + ContextUtils.getTtlThreadLocal() + "+++++++++++++++++++++++" + Thread.currentThread().getName());
         logger.info("Greeting: " + s);
     }
 

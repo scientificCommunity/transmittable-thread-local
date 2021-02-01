@@ -30,7 +30,7 @@ public class GrpcClientStreamTransformlet implements TtlTransformlet {
 
     private static final String GRPC_CALLBACK_INVOKE_CLASS_NAME = "io.grpc.internal.AbstractClientStream";
     private static final String STREAM_LISTENER_CLASS_NAME = "io.grpc.internal.ClientStreamListener";
-    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.TtlGrpcClientStreamListener";
+    private static final String TTL_STREAM_LISTENER_CLASS_NAME = "com.alibaba.ttl.integration.grpc.TtlGrpcClientStreamListener";
 
     private static final String GRPC_DELAY_STREAM_INVOKE_CLASS_NAME = "io.grpc.internal.DelayedStream";
 

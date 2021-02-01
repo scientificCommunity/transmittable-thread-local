@@ -69,8 +69,8 @@ public class HelloWorldClientTest {
                 public void sayHello(HelloRequest request, StreamObserver<HelloReply> respObserver) {
                     respObserver.onNext(HelloReply.getDefaultInstance());
                     respObserver.onCompleted();
-                    System.out.println("======================="+ContextUtils.getThreadLocal()+"=======================");
-                    System.out.println("+++++++++++++++++++++++"+ContextUtils.getTtlThreadLocal()+"+++++++++++++++++++++++");
+                    System.out.println("1=======================" + ContextUtils.getThreadLocal() + "=======================" + Thread.currentThread().getName());
+                    System.out.println("1+++++++++++++++++++++++" + ContextUtils.getTtlThreadLocal() + "+++++++++++++++++++++++" + Thread.currentThread().getName());
                     System.out.println(respObserver.getClass());
                 }
             }));
@@ -104,7 +104,7 @@ public class HelloWorldClientTest {
 
         client.greet("test name");
 
-        ContextUtils.set("hahahahhaha");
+        ContextUtils.set("gegegegegege");
 
         if (TtlAgent.isTtlAgentLoaded()) {
             System.out.println("Test WITH TTL Agent");
@@ -122,6 +122,8 @@ public class HelloWorldClientTest {
         // Access a service running on the local machine on port 50051
         String target = "localhost:50051";
 
+        ContextUtils.set("hahahahhaha");
+        System.out.println("｜｜｜｜｜｜｜｜｜｜｜｜｜｜｜｜" + Thread.currentThread().getName());
         // Create a communication channel to the server, known as a Channel. Channels are thread-safe
         // and reusable. It is common to create channels at the beginning of your application and reuse
         // them until the application shuts down.
@@ -139,5 +141,6 @@ public class HelloWorldClientTest {
             // again leave it running.
             channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
         }
+        System.out.println("执行完毕");
     }
 }
