@@ -27,6 +27,7 @@ public class TtlVertxFutureTransformlet extends BaseTtlTransformlet {
     private static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
 
     private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.Future";
+    private static final String HANDLER_IMPL_INVOKE_CLASS_NAME = "io.vertx.core.impl.FutureImpl";
     private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
     private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
 
@@ -34,6 +35,7 @@ public class TtlVertxFutureTransformlet extends BaseTtlTransformlet {
 
     static {
         CALL_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
+        CALL_CLASS_NAMES.add(HANDLER_IMPL_INVOKE_CLASS_NAME);
 
         PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
 
