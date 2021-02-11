@@ -27,19 +27,31 @@ public class TtlVertxFutureTransformlet extends BaseTtlTransformlet {
     private static final Set<String> DECORATE_METHODS_NAME = new HashSet<String>();
 
     private static final String HANDLER_INVOKE_CLASS_NAME = "io.vertx.core.Future";
-    private static final String HANDLER_IMPL_INVOKE_CLASS_NAME = "io.vertx.core.impl.FutureImpl";
+    private static final String HANDLER_IMPL_INVOKE_CLASS_NAME = "io.vertx.core.impl.future.FutureImpl";
+    private static final String NETTY_INVOKE_CLASS_NAME = "io.netty.channel.DefaultChannelPipeline";
+
     private static final String HANDLER_CLASS_NAME = "io.vertx.core.Handler";
     private static final String TTL_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlVertxHandler";
+
+    /**
+     * netty
+     */
+    private static final String NETTY_HANDLER_CLASS_NAME = "io.netty.channel.ChannelDuplexHandler";
+    private static final String NETTY_HANDLER1_CLASS_NAME = "io.netty.channel.ChannelHandler";
+    private static final String TTL_NETTY_HANDLER_CLASS_NAME = "com.alibaba.ttl.TtlNettyHandler";
 
     private static final String DECORATE_SET_HANDLER_METHOD = "setHandler";
 
     static {
-        CALL_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
-        CALL_CLASS_NAMES.add(HANDLER_IMPL_INVOKE_CLASS_NAME);
+//        CALL_CLASS_NAMES.add(HANDLER_INVOKE_CLASS_NAME);
+//        CALL_CLASS_NAMES.add(HANDLER_IMPL_INVOKE_CLASS_NAME);
+        CALL_CLASS_NAMES.add(NETTY_INVOKE_CLASS_NAME);
 
-        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
+        //PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(HANDLER_CLASS_NAME, TTL_HANDLER_CLASS_NAME);
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(NETTY_HANDLER_CLASS_NAME, TTL_NETTY_HANDLER_CLASS_NAME);
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(NETTY_HANDLER1_CLASS_NAME, TTL_NETTY_HANDLER_CLASS_NAME);
 
-        DECORATE_METHODS_NAME.add(DECORATE_SET_HANDLER_METHOD);
+        //DECORATE_METHODS_NAME.add(DECORATE_SET_HANDLER_METHOD);
     }
 
     @Override
@@ -48,16 +60,12 @@ public class TtlVertxFutureTransformlet extends BaseTtlTransformlet {
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             Method findClass = URLClassLoader.class.getDeclaredMethod("findClass", String.class);
             findClass.setAccessible(true);
-            findClass.invoke(contextClassLoader, TTL_HANDLER_CLASS_NAME);
+            //findClass.invoke(contextClassLoader, TTL_HANDLER_CLASS_NAME);
+            findClass.invoke(contextClassLoader, TTL_NETTY_HANDLER_CLASS_NAME);
         } catch (Throwable t) {
             LOGGER.info("load class failed in TtlFutureTransformlet. 【className:" + TTL_HANDLER_CLASS_NAME + "】" +
                 "cause:" + t.getMessage());
         }
-    }
-
-    @Override
-    protected boolean needDecorateToTtlWrapper(String methodName) {
-        return DECORATE_METHODS_NAME.contains(methodName);
     }
 
     @Override
