@@ -73,11 +73,13 @@ public class NettyTtlTransformlet implements TtlTransformlet {
 
         //get original class
         if (TO_BE_TRANSFORMED_UNWRAPPED_CLASS_NAMES.contains(classInfo.getClassName())) {
-            updateConstructorForUnWrapperListener();
+            for (CtMethod method : clazz.getDeclaredMethods()) {
+                updateConstructorForUnWrapperListener(method);
+            }
         }
     }
 
-    private void updateConstructorForUnWrapperListener() {
+    private void updateConstructorForUnWrapperListener(CtMethod method) throws NotFoundException, CannotCompileException {
         final int modifiers = method.getModifiers();
         if (Modifier.constructorModifiers() != modifiers) {
             return;
@@ -91,7 +93,8 @@ public class NettyTtlTransformlet implements TtlTransformlet {
                 String code = String.format(
                     // decorate to TTL wrapper,
                     // and then set AutoWrapper attachment/Tag
-                    "$%d = %s.unwrap();",
+                    "if($%d instanceof" + TO_BE_WRAPPED_CLASS_NAMES.get(paramTypeName) + ")" +
+                        "{$%d = %s.unwrap();}",
                     i + 1, TO_BE_WRAPPED_CLASS_NAMES.get(paramTypeName));
                 logger.info("insert code before method " + signatureOfMethod(method) + " of class " + method.getDeclaringClass().getName() + ":\n" + code);
                 insertCode.append(code);
