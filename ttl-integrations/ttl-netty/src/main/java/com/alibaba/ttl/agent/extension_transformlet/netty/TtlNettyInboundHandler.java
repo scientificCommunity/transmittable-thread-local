@@ -1,4 +1,4 @@
-package com.alibaba.ttl.agent.extension_transformlet.vertx;
+package com.alibaba.ttl.agent.extension_transformlet.netty;
 
 import com.alibaba.ttl.TtlUnwrap;
 import com.alibaba.ttl.spi.TtlAttachments;
@@ -11,7 +11,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.handler.codec.http.HttpClientCodec;
-import io.vertx.core.Handler;
 
 import java.util.ArrayList;
 import java.util.Collection;

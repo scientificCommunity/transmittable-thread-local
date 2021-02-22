@@ -1,4 +1,4 @@
-package com.alibaba.ttl.agent.extension_transformlet.vertx.transformlet;
+package com.alibaba.ttl.agent.extension_transformlet.netty.transformlet;
 
 import com.alibaba.ttl.threadpool.agent.logging.Logger;
 import com.alibaba.ttl.threadpool.agent.transformlet.ClassInfo;
@@ -20,14 +20,10 @@ import java.util.Set;
 import static com.alibaba.ttl.threadpool.agent.transformlet.helper.TtlTransformletHelper.signatureOfMethod;
 
 /**
- * {@link TtlTransformlet} for {@link io.vertx.core.Future}.
+ * {@link TtlTransformlet} for {@link io.netty.channel.ChannelHandler}
+ * and {@link io.netty.util.concurrent.GenericFutureListener}.
  *
  * @author tk (305809299 at qq dot com)
- * @see com.alibaba.ttl.integration.vertx4.TtlVertxHandler
- * @see io.vertx.core.Future
- * @see io.vertx.core.Handler
- * @see sun.misc.Launcher.AppClassLoader
- * @see URLClassLoader#findClass(String)
  */
 public class NettyTtlTransformlet implements TtlTransformlet {
     private static final Logger logger = Logger.getLogger(NettyTtlTransformlet.class);
@@ -39,10 +35,10 @@ public class NettyTtlTransformlet implements TtlTransformlet {
     private static final String DEFAULT_CHANNEL_PROMISE_CLASS_NAME = "io.netty.channel.DefaultChannelPromise";
 
     private static final String CHANNEL_HANDLER_CLASS_NAME = "io.netty.channel.ChannelHandler";
-    private static final String TTL_WRAP_HANDLER_UTILS_CLASS_NAME = "com.alibaba.ttl.agent.extension_transformlet.vertx.TtlWrapHandlerUtils";
+    private static final String TTL_WRAP_HANDLER_UTILS_CLASS_NAME = "com.alibaba.ttl.agent.extension_transformlet.netty.TtlWrapHandlerUtils";
 
     private static final String GENERIC_FUTURE_LISTENER_CLASS_NAME = "io.netty.util.concurrent.GenericFutureListener";
-    private static final String TTL_GENERIC_FUTURE_LISTENER_CLASS_NAME = "com.alibaba.ttl.agent.extension_transformlet.vertx.TtlGenericFutureListener";
+    private static final String TTL_GENERIC_FUTURE_LISTENER_CLASS_NAME = "com.alibaba.ttl.agent.extension_transformlet.netty.TtlGenericFutureListener";
 
     private static final Set<String> TO_BE_TRANSFORMED_CLASS_NAMES = new HashSet<>();
     private static final Map<String, String> TO_BE_WRAPPED_CLASS_NAMES = new HashMap<>();

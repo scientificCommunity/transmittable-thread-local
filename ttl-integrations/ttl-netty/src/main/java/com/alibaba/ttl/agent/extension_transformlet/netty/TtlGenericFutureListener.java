@@ -1,4 +1,4 @@
-package com.alibaba.ttl.agent.extension_transformlet.vertx;
+package com.alibaba.ttl.agent.extension_transformlet.netty;
 
 import com.alibaba.ttl.spi.TtlAttachments;
 import com.alibaba.ttl.spi.TtlAttachmentsDelegate;
@@ -8,7 +8,6 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.vertx.core.Handler;
 
 import java.util.ArrayList;
 import java.util.Collection;
