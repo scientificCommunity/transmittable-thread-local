@@ -8,6 +8,7 @@ import com.alibaba.ttl.spi.TtlWrapper;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import io.netty.channel.*;
+import io.netty.handler.codec.http.HttpClientCodec;
 import io.vertx.core.Handler;
 
 import java.net.SocketAddress;
@@ -77,6 +78,9 @@ public class TtlNettyInboundHandler implements ChannelInboundHandler, TtlWrapper
             return null;
         }
 
+        if (handler instanceof HttpClientCodec) {
+            return handler;
+        }
         if (handler instanceof ChannelInboundHandler) {
 
             if (handler instanceof TtlEnhanced) {
