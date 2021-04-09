@@ -2,7 +2,10 @@ package com.alibaba.ttl.threadpool.agent;
 
 import com.alibaba.ttl.threadpool.agent.internal.logging.Logger;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.JavassistTransformlet;
-import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.*;
+import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlExecutorTransformlet;
+import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlForkJoinTransformlet;
+import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlTimerTaskTransformlet;
+import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlVertxFutureTransformlet;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 
@@ -138,7 +141,7 @@ public final class TtlAgent {
             transformletList.add(new TtlForkJoinTransformlet(disableInheritableForThreadPool));
 
             transformletList.add(new TtlVertxFutureTransformlet());
-            transformletList.add(new TtlStreamTransformlet());
+            //transformletList.add(new TtlStreamTransformlet());
 
             if (isEnableTimerTask()) transformletList.add(new TtlTimerTaskTransformlet());
 

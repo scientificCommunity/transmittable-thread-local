@@ -121,7 +121,14 @@
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-core</artifactId>
 			<version>1.25.0</version>
-			<optional>true</optional>
+			<!--<optional>true</optional>-->
+		</dependency>
+
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-core</artifactId>
+			<version>4.0.0-milestone4</version>
+			<!--<optional>true</optional>-->
 		</dependency>
 		<!--
 			javassist v3.23 is the last version support Java 6
